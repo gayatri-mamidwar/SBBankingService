@@ -7,6 +7,9 @@ import dev.gayatri.banking.repository.AccountRepository;
 import dev.gayatri.banking.service.AccountService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -26,7 +29,57 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDto getAccountById(Long id) {
         Account account = accountRepository
-                .findById(id).orElseThrow(() -> new RuntimeException("Account does not exists"));
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Account does not exists"));
                 return AccountMapper.mapToAccountDto(account);
+    }
+
+    @Override
+    public AccountDto deposit(Long id, double amount) {
+        Account account = accountRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Account does not Exist"));
+
+        double totalAmt = account.getBalance() + amount;
+        account.setBalance(totalAmt);
+        Account savedAccount = accountRepository.save(account);
+        return AccountMapper.mapToAccountDto(savedAccount);
+
+    }
+
+    @Override
+    public AccountDto withdraw(Long id, double amount) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Account does not exist"));
+
+        if(account.getBalance() < amount){
+            throw new RuntimeException("Insufficient Balance..");
+        }
+
+        double reducedAmt = account.getBalance() - amount;
+        account.setBalance(reducedAmt);
+        Account savedAccount = accountRepository.save(account);
+        return AccountMapper.mapToAccountDto(savedAccount);
+    }
+
+    @Override
+    public List<AccountDto> getAllAccounts() {
+
+        List<Account> accounts = accountRepository.findAll();
+        List<AccountDto> accounts1 = new ArrayList<>();
+
+        for(Account a : accounts){
+            accounts1.add(AccountMapper.mapToAccountDto(a));
+        }
+
+        return accounts1;
+    }
+
+    @Override
+    public void deleteAccount(long id) {
+        Account account = accountRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Account does not exist"));
+
+        accountRepository.deleteById(id);
     }
 }

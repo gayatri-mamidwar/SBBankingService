@@ -2,8 +2,8 @@ package dev.gayatri.banking.entity;
 
 import jakarta.persistence.*;
 
-@Table(name = "accounts")
 @Entity
+@Table(name = "accounts")
 
 public class Account {
 
